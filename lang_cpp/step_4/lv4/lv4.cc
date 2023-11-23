@@ -16,7 +16,7 @@ int main(){
     }
 
     max = arr[0];
-    index_of_max = 0;
+    index_of_max = 1;
 
     for (int i = 1; i < length; i++)
     {
