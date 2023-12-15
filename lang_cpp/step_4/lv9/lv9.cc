@@ -17,7 +17,7 @@ int main(){
     for (int l = 0; l < m; l++)
     {
         cin >> i >> j;
-        for(int p = i-1, q = j-1; p<j/2-1; p++, q--)
+        for(int p = i-1, q = j-1; p < q; p++, q--)
         {
             temp = basket[p];
             basket[p] = basket[q];
