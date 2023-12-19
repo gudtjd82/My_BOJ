@@ -4,9 +4,9 @@
 using namespace std;
 
 int main(){
-    int a = 3;
-    double b = 2;
+    string str[5];
+    str[1] = "djaskl";
 
-    cout << b/a << endl;
+    cout << str[1] << endl;
     return 0;
 }

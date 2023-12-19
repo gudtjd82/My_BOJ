@@ -4,10 +4,8 @@
 using namespace std;
 
 int main(){
-    int i = 0;
-    if(i)
-    {
-        cout << "adssa" << endl;
-    }
+    int quarter, price = 101;
+    quarter = int(price /= 25);
+    cout << quarter << " " << price <<endl;
     return 0;
 }
