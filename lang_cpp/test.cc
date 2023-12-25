@@ -4,16 +4,14 @@
 using namespace std;
 
 int main(){
-    int* p;
-    int a = 2;
+    int arr[3][3];
+    int a = 3;
 
-    p = &a;
+    arr[2][2] = a;
 
-    int b = *p;
+    a  = 1;
 
-    b = 4;
-
-    cout << a << endl;
+    cout << arr[2][2] << endl;
     
     return 0;
 }
