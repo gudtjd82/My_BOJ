@@ -5,8 +5,8 @@
 
 using namespace std;
 
-template <typename T>
 // 차집합 함수
+template <typename T>
 set<T> diffOfSets(set<T> a, set<T> b)
 {
     set<T> diff;
@@ -20,6 +20,7 @@ set<T> diffOfSets(set<T> a, set<T> b)
     
     return diff;
 }
+
 // 교집합 함수
 template <typename T>
 set<T> intersecOfSets(set<T> a, set<T> b)
@@ -34,6 +35,22 @@ set<T> intersecOfSets(set<T> a, set<T> b)
     }
 
     return common;
+}
+
+// 합집합 함수
+template <typename T>
+set<T> combiOfSets(set<T> a, set<T> b)
+{
+    set<T> combi = b;
+    for(const auto& elem : a)
+    {
+        if(b.count(elem) == 0)
+        {
+            combi.insert(elem);
+        }
+    }
+
+    return combi;
 }
 
 class Node
@@ -181,6 +198,8 @@ int main(){
     int r, c, b;
     Node* temp_sq;
 
+    char next;
+
     // sudoku 생성
     for(int i = 0; i < 9; i++)
     {
@@ -313,8 +332,7 @@ int main(){
 
     bool check_change = true;
     bool check_blank = true;
-    Node* temp_node = NULL;
-    int insert_num = 0;
+    bool check_common = false;
     set<int> inter_row;
     set<int> inter_col;
     set<int> inter_box;
@@ -347,9 +365,7 @@ int main(){
                     if(temp_sq->get_num() == 0)
                     {
                         Node* temp_sq2;
-                        inter_row = temp_sq->get_possibleNums();
-                        inter_col = temp_sq->get_possibleNums();
-                        inter_box = temp_sq->get_possibleNums();
+                        
                         set<int> diff_row = temp_sq->get_possibleNums();
                         set<int> diff_col = temp_sq->get_possibleNums();
                         set<int> diff_box = temp_sq->get_possibleNums();
@@ -362,27 +378,27 @@ int main(){
                             if(k != c && temp_sq2->get_num() == 0)
                             {
                                 diff_row = diffOfSets(diff_row, temp_sq2->get_possibleNums());
-                                inter_row = intersecOfSets(inter_row, temp_sq2->get_possibleNums());
                             }
                             // col
                             temp_sq2 = &sudoku[k][c];
                             if(k != r && temp_sq2->get_num() == 0)
                             {
                                 diff_col = diffOfSets(diff_col, temp_sq2->get_possibleNums());
-                                inter_col = intersecOfSets(inter_col, temp_sq2->get_possibleNums());
                             }
                             // box
                             temp_sq2 = boxes[b][k];
                             if(temp_sq2 != temp_sq && temp_sq2->get_num() == 0)
                             {
                                 diff_box = diffOfSets(diff_box, temp_sq2->get_possibleNums());
-                                inter_box = intersecOfSets(inter_box, temp_sq2->get_possibleNums());
                             }
                         }
 
-                        temp_sq->set_inter_row(inter_row);
-                        temp_sq->set_inter_col(inter_col);
-                        temp_sq->set_inter_box(inter_box);
+                        // cout << "sudoku[" << r << "][" << c << "]:";
+                        // for(const auto& elem : temp_sq->get_inter_row())
+                        // {
+                        //     cout << elem << ", ";
+                        // }
+                        // cout << endl;
 
                         if(diff_row.size() == 1)
                         {
@@ -401,12 +417,48 @@ int main(){
                         }
                     }
                 }
+                // cin >> next;
                 
-                
+                if(true)
+                {
+                    cout << "------------------------" << endl;
+                    for(int k = 0; k<9; k++)
+                    {
+                        for(int j = 0; j <9; j++)
+                        {
+                            sudoku[k][j].print_node();
+                            cout << ' ';
+                        }
+                        cout << endl;
+                    }
+                    cout << "----------------------" << endl;
+                    for(int k = 0; k <9; k++)
+                    {
+                        for(int j = 0; j<9; j++)
+                        {
+                            temp_sq = &sudoku[k][j];
+
+                            if(temp_sq->get_num() == 0)
+                            {
+                                cout << "(" << k+1 << ", " << j+1 <<") =>";
+                                for(const auto& elem : temp_sq->get_possibleNums())
+                                {
+                                    cout << " " <<  elem;
+                                }
+                                cout << endl;
+                            }
+                        }
+                    }
+                    cout << "----------------------" << endl;
+                    
+                    std::cin >> next;
+                }
             }
         }
-        else
+
+        if(!check_change)
         {
+            Node* temp_sq2;
             for(int i = 0; i <  9; i++)
             {
                 for(int j = 0; j < 9; j++)
@@ -416,71 +468,186 @@ int main(){
                     temp_sq = &sudoku[r][c];
                     b = temp_sq->get_box();
 
-                    set<int> invalid_nums_row = diffOfSets(temp_sq->get_possibleNums(), inter_row);
-                    set<int> invalid_nums_col = diffOfSets(temp_sq->get_possibleNums(), inter_col);
-                    set<int> invalid_nums_box = diffOfSets(temp_sq->get_possibleNums(), inter_box);
-                    // intersec = intersecOfSets(intersec, diff_box);
                     if(temp_sq->get_num() == 0)
                     {
                         check_blank = true;
-                        if(invalid_nums_row.size() > 0)
+                        inter_row = temp_sq->get_possibleNums();
+                        inter_col = temp_sq->get_possibleNums();
+                        inter_box = temp_sq->get_possibleNums();
+
+                        for(int k = 0; k < 9; k++)
                         {
-                            set_sq(sudoku, boxes, temp_sq, *(invalid_nums_row.begin()));
+                            temp_sq2 = &sudoku[r][k];
+                            if(k != c && temp_sq2->get_num() == 0)
+                            {
+                                inter_row = intersecOfSets(inter_row, temp_sq2->get_possibleNums());
+                                temp_sq->set_inter_row(inter_row);
+                            }
+
+                            temp_sq2 = &sudoku[k][c];
+                            if(k != r && temp_sq2->get_num() == 0)
+                            {
+                                inter_col = intersecOfSets(inter_col, temp_sq2->get_possibleNums());
+                                temp_sq->set_inter_col(inter_col);
+                            }
+
+                            temp_sq2 = boxes[b][k];
+                            if(temp_sq2 != temp_sq && temp_sq2->get_num() == 0)
+                            {
+                                inter_box = intersecOfSets(inter_box, temp_sq2->get_possibleNums());
+                                temp_sq->set_inter_box(inter_box);
+                            }
+                        }
+
+                        set<int> valid_nums_row = diffOfSets(temp_sq->get_possibleNums(), inter_row);
+                        set<int> valid_nums_col = diffOfSets(temp_sq->get_possibleNums(), inter_col);
+                        set<int> valid_nums_box = diffOfSets(temp_sq->get_possibleNums(), inter_box);
+
+                        set<int> common_valid = intersecOfSets(valid_nums_row, valid_nums_col);
+                        common_valid = intersecOfSets(common_valid, valid_nums_box);
+
+                        check_common = false;
+                        if(common_valid.size() == 1)
+                        {
+                            cout << "sudoku[" << r << "][" << c << "]:";
+                            cout << " valid의 교집합 과정" << endl;
+
+                            cout << "   =>";
+                            for(const auto& elem : common_valid)
+                            {
+                                cout << " " << elem;
+                            }
+                            cout << endl;
+
+                            check_common = true;
+                            set_sq(sudoku, boxes, temp_sq, *(common_valid.begin()));
                             check_change = true;
                         }
-                        else if(invalid_nums_col.size() > 0)
+
+                        /*
+                        if(valid_nums_row.size() > 0)
                         {
-                            set_sq(sudoku, boxes, temp_sq, *(invalid_nums_col.begin()));
+                            set_sq(sudoku, boxes, temp_sq, *(valid_nums_row.begin()));
                             check_change = true;
                         }
-                        else if(invalid_nums_box.size() > 0)
+                        else if(valid_nums_col.size() > 0)
                         {
-                            set_sq(sudoku, boxes, temp_sq, *(invalid_nums_box.begin()));
+                            set_sq(sudoku, boxes, temp_sq, *(valid_nums_col.begin()));
+                            check_change = true;
+                        }
+                        else if(valid_nums_box.size() > 0)
+                        {
+                            set_sq(sudoku, boxes, temp_sq, *(valid_nums_box.begin()));
                             check_change = true;
                         }
                         else{
                             set_sq(sudoku, boxes, temp_sq, *(temp_sq->get_possibleNums().begin()));
                             check_change = true;
                         }
+                        */
                     }
                 }
-            }
-        }
-
-        if(false)
-        {
-            cout << "------------------------" << endl;
-            for(int k = 0; k<9; k++)
-            {
-                for(int j = 0; j <9; j++)
+                if(true)
                 {
-                    sudoku[k][j].print_node();
-                    cout << ' ';
-                }
-                cout << endl;
-            }
-            cout << "----------------------" << endl;
-            for(int k = 0; k <9; k++)
-            {
-                for(int j = 0; j<9; j++)
-                {
-                    temp_sq = &sudoku[k][j];
-
-                    if(temp_sq->get_num() == 0)
+                    cout << "------------------------" << endl;
+                    for(int k = 0; k<9; k++)
                     {
-                        cout << "(" << k+1 << ", " << j+1 <<") =>";
-                        for(const auto& elem : temp_sq->get_possibleNums())
+                        for(int j = 0; j <9; j++)
                         {
-                            cout << " " <<  elem;
+                            sudoku[k][j].print_node();
+                            cout << ' ';
                         }
                         cout << endl;
                     }
+                    cout << "----------------------" << endl;
+                    for(int k = 0; k <9; k++)
+                    {
+                        for(int j = 0; j<9; j++)
+                        {
+                            temp_sq = &sudoku[k][j];
+
+                            if(temp_sq->get_num() == 0)
+                            {
+                                cout << "(" << k+1 << ", " << j+1 <<") =>";
+                                for(const auto& elem : temp_sq->get_possibleNums())
+                                {
+                                    cout << " " <<  elem;
+                                }
+                                cout << endl;
+                            }
+                        }
+                    }
+                    cout << "----------------------" << endl;
+                    char next;
+                    std::cin >> next;
                 }
             }
-            cout << "----------------------" << endl;
-            char next;
-            std::cin >> next;
         }
+
+        if(!check_change && !check_common)
+        {
+            for(int i = 0; i < 9; i++)
+            {
+                for(int j = 0; j <9; j++)
+                {
+                    if(temp_sq->get_num() == 0)
+                    {
+                        check_blank = true;
+
+                        set<int> valid_nums_row = diffOfSets(temp_sq->get_possibleNums(), temp_sq->get_inter_row());
+                        set<int> valid_nums_col = diffOfSets(temp_sq->get_possibleNums(), temp_sq->get_inter_col());
+                        set<int> valid_nums_box = diffOfSets(temp_sq->get_possibleNums(), temp_sq->get_inter_box());
+
+                        set<int> combi_valid = combiOfSets(valid_nums_row, valid_nums_col);
+                        combi_valid = combiOfSets(combi_valid, valid_nums_box);
+                        
+                        if(combi_valid.size() > 0)
+                        {
+                            cout << "sudoku[" << r << "][" << c << "]:";
+                            cout << " valid의 합집합 과정" << endl;
+                            set_sq(sudoku, boxes, temp_sq, *(combi_valid.begin()));
+                            check_change = true;
+                        }
+                    }
+                }
+                if(true)
+                {
+                    cout << "------------------------" << endl;
+                    for(int k = 0; k<9; k++)
+                    {
+                        for(int j = 0; j <9; j++)
+                        {
+                            sudoku[k][j].print_node();
+                            cout << ' ';
+                        }
+                        cout << endl;
+                    }
+                    cout << "----------------------" << endl;
+                    for(int k = 0; k <9; k++)
+                    {
+                        for(int j = 0; j<9; j++)
+                        {
+                            temp_sq = &sudoku[k][j];
+
+                            if(temp_sq->get_num() == 0)
+                            {
+                                cout << "(" << k+1 << ", " << j+1 <<") =>";
+                                for(const auto& elem : temp_sq->get_possibleNums())
+                                {
+                                    cout << " " <<  elem;
+                                }
+                                cout << endl;
+                            }
+                        }
+                    }
+                    cout << "----------------------" << endl;
+                    char next;
+                    std::cin >> next;
+                }
+            }
+        }
+
+        
     }
 
     // cout << "------------------------" << endl;
