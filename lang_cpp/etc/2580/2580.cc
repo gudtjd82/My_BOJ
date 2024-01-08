@@ -27,7 +27,7 @@ set<T> intersecOfSets(set<T> a, set<T> b)
     set<T> common;
     for(const auto& elem : a)
     {
-        if(b.count(a) > 0)
+        if(b.count(elem) > 0)
         {
             common.insert(elem);
         }
@@ -40,11 +40,14 @@ class Node
 {
 private:
     int num;
-    set<int> possible_nums;
-    int count = 0;
     int row;
     int col;
     int box;
+    set<int> possible_nums;
+    int count = 0;
+    set<int> inter_row;
+    set<int> inter_col;
+    set<int> inter_box;
 public:
     Node(){
         this->num = 0;
@@ -52,6 +55,9 @@ public:
         this->col = 0;
         this->box = 0;
         this->possible_nums.clear();
+        this->inter_row.clear();
+        this->inter_col.clear();
+        this->inter_box.clear();
     }
     Node(int _num, int _row, int _col, int _box)
     {
@@ -103,6 +109,18 @@ public:
     int get_count(){
         return this->count;
     }
+    set<int> get_inter_row()
+    {
+        return this->inter_row;
+    }
+    set<int> get_inter_col()
+    {
+        return this->inter_col;
+    }
+    set<int> get_inter_box()
+    {
+        return this->inter_box;
+    }
 
     void set_num(int _num){
         this->num = _num;
@@ -121,6 +139,18 @@ public:
         this->possible_nums = nums;
         this->count = nums.size();
     }
+    void set_inter_row(set<int> inter_row)
+    {
+        this->inter_row = inter_row;
+    }
+    void set_inter_col(set<int> inter_col)
+    {
+        this->inter_col = inter_col;
+    }
+    void set_inter_box(set<int> inter_box)
+    {
+        this->inter_box = inter_box;
+    }
 };
 
 // sudoku 숫자 설정
@@ -135,10 +165,8 @@ void set_sq(Node sudoku[9][9], Node* boxes[9][9], Node* sq, int num)
     for(int k = 0; k < 9; k++)
     {
         sudoku[r][k].del_possNum(poss_num);
-        if(k != r && k != c)
-            sudoku[k][c].del_possNum(poss_num);
-        if(boxes[b][k] != &sudoku[r][k] || boxes[b][k] != &sudoku[k][c])
-            boxes[b][k]->del_possNum(poss_num);
+        sudoku[k][c].del_possNum(poss_num);
+        boxes[b][k]->del_possNum(poss_num);
     }
 }
 
@@ -158,7 +186,7 @@ int main(){
     {
         for(int j = 0; j < 9; j++)
         {
-            cin >> n;
+            std::cin >> n;
             sudoku[i][j].set_num(n);
             sudoku[i][j].set_row(i);
             sudoku[i][j].set_col(j);
@@ -261,129 +289,186 @@ int main(){
     }
 
     // possible nums 출력
-    cout << "----------------------" << endl;
-    for(int i = 0; i <9; i++)
-    {
-        for(int j = 0; j<9; j++)
-        {
-            temp_sq = &sudoku[i][j];
+    // cout << "----------------------" << endl;
+    // for(int i = 0; i <9; i++)
+    // {
+    //     for(int j = 0; j<9; j++)
+    //     {
+    //         temp_sq = &sudoku[i][j];
 
-            if(temp_sq->get_num() == 0)
-            {
-                cout << "(" << i+1 << ", " << j+1 <<") =>";
-                for(const auto& elem : temp_sq->get_possibleNums())
-                {
-                    cout << " " <<  elem;
-                }
-                cout << endl;
-            }
-        }
-    }
-    cout << "----------------------" << endl;
+    //         if(temp_sq->get_num() == 0)
+    //         {
+    //             cout << "(" << i+1 << ", " << j+1 <<") =>";
+    //             for(const auto& elem : temp_sq->get_possibleNums())
+    //             {
+    //                 cout << " " <<  elem;
+    //             }
+    //             cout << endl;
+    //         }
+    //     }
+    // }
+    // cout << "----------------------" << endl;
     // return 0;
 
 
     bool check_change = true;
+    bool check_blank = true;
     Node* temp_node = NULL;
     int insert_num = 0;
+    set<int> inter_row;
+    set<int> inter_col;
+    set<int> inter_box;
     r = -1, c = -1, b = -1;
-    while(check_change)
+    while(check_blank)
     {
-        check_change = false;
-
-        for(int i = 0; i < 9; i++)
+        check_blank = false;
+        if(check_change)
         {
-            for(int j = 0; j<9; j++)
+            check_change = false;
+
+            for(int i = 0; i < 9; i++)
             {
-                r = i;
-                c = j;
-                temp_sq = &sudoku[r][c];
-                b = temp_sq->get_box();
-                
-                if(temp_sq->get_num() == 0 && temp_sq->get_count() == 1)
+                for(int j = 0; j<9; j++)
                 {
-                    set_sq(sudoku, boxes, temp_sq, *(temp_sq->get_possibleNums().begin()));
-                    check_change = true;
+                    r = i;
+                    c = j;
+                    temp_sq = &sudoku[r][c];
+                    b = temp_sq->get_box();
+                    
+                    if(temp_sq->get_num() == 0)
+                        check_blank = true;
+                    
+                    if(temp_sq->get_num() == 0 && temp_sq->get_count() == 1)
+                    {
+                        set_sq(sudoku, boxes, temp_sq, *(temp_sq->get_possibleNums().begin()));
+                        check_change = true;
+                    }
+
+                    if(temp_sq->get_num() == 0)
+                    {
+                        Node* temp_sq2;
+                        inter_row = temp_sq->get_possibleNums();
+                        inter_col = temp_sq->get_possibleNums();
+                        inter_box = temp_sq->get_possibleNums();
+                        set<int> diff_row = temp_sq->get_possibleNums();
+                        set<int> diff_col = temp_sq->get_possibleNums();
+                        set<int> diff_box = temp_sq->get_possibleNums();
+
+                        // 같은 row OR col OR box에 있는 칸과 비교
+                        for(int k = 0; k<9; k++)
+                        {
+                            // row
+                            temp_sq2 = &sudoku[r][k];
+                            if(k != c && temp_sq2->get_num() == 0)
+                            {
+                                diff_row = diffOfSets(diff_row, temp_sq2->get_possibleNums());
+                                inter_row = intersecOfSets(inter_row, temp_sq2->get_possibleNums());
+                            }
+                            // col
+                            temp_sq2 = &sudoku[k][c];
+                            if(k != r && temp_sq2->get_num() == 0)
+                            {
+                                diff_col = diffOfSets(diff_col, temp_sq2->get_possibleNums());
+                                inter_col = intersecOfSets(inter_col, temp_sq2->get_possibleNums());
+                            }
+                            // box
+                            temp_sq2 = boxes[b][k];
+                            if(temp_sq2 != temp_sq && temp_sq2->get_num() == 0)
+                            {
+                                diff_box = diffOfSets(diff_box, temp_sq2->get_possibleNums());
+                                inter_box = intersecOfSets(inter_box, temp_sq2->get_possibleNums());
+                            }
+                        }
+
+                        temp_sq->set_inter_row(inter_row);
+                        temp_sq->set_inter_col(inter_col);
+                        temp_sq->set_inter_box(inter_box);
+
+                        if(diff_row.size() == 1)
+                        {
+                            set_sq(sudoku, boxes, temp_sq, *(diff_row.begin()));
+                            check_change = true;
+                        }
+                        else if(diff_col.size() == 1)
+                        {
+                            set_sq(sudoku, boxes, temp_sq, *(diff_col.begin()));
+                            check_change = true;
+                        }
+                        else if(diff_box.size() == 1)
+                        {
+                            set_sq(sudoku, boxes, temp_sq, *(diff_box.begin()));
+                            check_change = true;
+                        }
+                    }
                 }
-
-                if(temp_sq->get_num() == 0)
+                
+                
+            }
+        }
+        else
+        {
+            for(int i = 0; i <  9; i++)
+            {
+                for(int j = 0; j < 9; j++)
                 {
-                    Node* temp_sq2;
-                    set<int> diff_row = temp_sq->get_possibleNums();
-                    set<int> diff_col = temp_sq->get_possibleNums();
-                    set<int> diff_box = temp_sq->get_possibleNums();
-                    // 같은 row OR col OR box에 있는 칸과 비교
-                    for(int k = 0; k<9; k++)
-                    {
-                        // row
-                        temp_sq2 = &sudoku[r][k];
-                        if(k != c && temp_sq2->get_num() == 0)
-                        {
-                            diff_row = diffOfSets(diff_row, temp_sq2->get_possibleNums());
-                        }
-                        // col
-                        temp_sq2 = &sudoku[k][c];
-                        if(k != r && temp_sq2->get_num() == 0)
-                        {
-                            diff_col = diffOfSets(diff_col, temp_sq2->get_possibleNums());
-                        }
-                        // box
-                        temp_sq2 = boxes[b][k];
-                        if(temp_sq2 != temp_sq && temp_sq2->get_num() == 0)
-                        {
-                            diff_box = diffOfSets(diff_box, temp_sq2->get_possibleNums());
-                        }
-                    }
-                    if(diff_row.size() == 1)
-                    {
-                        set_sq(sudoku, boxes, temp_sq, *(diff_row.begin()));
-                        check_change = true;
-                    }
-                    if(diff_col.size() == 1)
-                    {
-                        set_sq(sudoku, boxes, temp_sq, *(diff_col.begin()));
-                        check_change = true;
-                    }
-                    if(diff_box.size() == 1)
-                    {
-                        set_sq(sudoku, boxes, temp_sq, *(diff_box.begin()));
-                        check_change = true;
-                    }
+                    r = i;
+                    c = j;
+                    temp_sq = &sudoku[r][c];
+                    b = temp_sq->get_box();
 
-                    if(!check_change)
+                    set<int> invalid_nums_row = diffOfSets(temp_sq->get_possibleNums(), inter_row);
+                    set<int> invalid_nums_col = diffOfSets(temp_sq->get_possibleNums(), inter_col);
+                    set<int> invalid_nums_box = diffOfSets(temp_sq->get_possibleNums(), inter_box);
+                    // intersec = intersecOfSets(intersec, diff_box);
+                    if(temp_sq->get_num() == 0)
                     {
-
+                        check_blank = true;
+                        if(invalid_nums_row.size() > 0)
+                        {
+                            set_sq(sudoku, boxes, temp_sq, *(invalid_nums_row.begin()));
+                            check_change = true;
+                        }
+                        else if(invalid_nums_col.size() > 0)
+                        {
+                            set_sq(sudoku, boxes, temp_sq, *(invalid_nums_col.begin()));
+                            check_change = true;
+                        }
+                        else if(invalid_nums_box.size() > 0)
+                        {
+                            set_sq(sudoku, boxes, temp_sq, *(invalid_nums_box.begin()));
+                            check_change = true;
+                        }
+                        else{
+                            set_sq(sudoku, boxes, temp_sq, *(temp_sq->get_possibleNums().begin()));
+                            check_change = true;
+                        }
                     }
-                    // if(diff_row.size() == 0 && diff_col.size() == 0; diff_box.size() == 0)
-                    // {
-                    //     if(temp_sq->get_possibleNums().size() > 0)
-                    //     {
-                    //         set_sq(sudoku, boxes, temp_sq, *(temp_sq->get_possibleNums().begin()));
-                    //         check_change = true;
-                    //     }
-                    // }
                 }
             }
+        }
+
+        if(false)
+        {
             cout << "------------------------" << endl;
-            for(int i = 0; i<9; i++)
+            for(int k = 0; k<9; k++)
             {
                 for(int j = 0; j <9; j++)
                 {
-                    sudoku[i][j].print_node();
+                    sudoku[k][j].print_node();
                     cout << ' ';
                 }
                 cout << endl;
             }
             cout << "----------------------" << endl;
-            for(int i = 0; i <9; i++)
+            for(int k = 0; k <9; k++)
             {
                 for(int j = 0; j<9; j++)
                 {
-                    temp_sq = &sudoku[i][j];
+                    temp_sq = &sudoku[k][j];
 
                     if(temp_sq->get_num() == 0)
                     {
-                        cout << "(" << i+1 << ", " << j+1 <<") =>";
+                        cout << "(" << k+1 << ", " << j+1 <<") =>";
                         for(const auto& elem : temp_sq->get_possibleNums())
                         {
                             cout << " " <<  elem;
@@ -393,9 +478,22 @@ int main(){
                 }
             }
             cout << "----------------------" << endl;
+            char next;
+            std::cin >> next;
         }
     }
 
+    // cout << "------------------------" << endl;
+    for(int i = 0; i<9; i++)
+    {
+        for(int j = 0; j <9; j++)
+        {
+            sudoku[i][j].print_node();
+            if(j != 8)
+                cout << ' ';
+        }
+        cout << endl;
+    }
     // possible nums 출력
     // cout << "----------------------" << endl;
     // for(int i = 0; i <9; i++)
@@ -415,19 +513,5 @@ int main(){
     //         }
     //     }
     // }
-    // return 0;
-
-
-
-    cout << "------------------------" << endl;
-    for(int i = 0; i<9; i++)
-    {
-        for(int j = 0; j <9; j++)
-        {
-            sudoku[i][j].print_node();
-            cout << ' ';
-        }
-        cout << endl;
-    }
     return 0;
 }

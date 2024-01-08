@@ -1,0 +1,2 @@
+char next;
+            // cin >> next;
