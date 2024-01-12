@@ -4,14 +4,15 @@
 using namespace std;
 
 int main(){
-    int arr[3][3];
     int a = 3;
+    int c = 4;
+    int d = 8;
+    int e = 0;
+    double b = 2.0;
 
-    arr[2][2] = a;
-
-    a  = 1;
-
-    cout << arr[2][2] << endl;
-    
+    cout << a / b << endl;
+    cout << (a / (d-c) > e) << endl;
+    cout << (a / double(d-c) > e) << endl;
+    cout << (a / double(d-c) > double(e)) << endl;
     return 0;
 }
