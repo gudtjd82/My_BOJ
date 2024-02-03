@@ -25,62 +25,65 @@ int main(){
     }
 
     min = 64;
-    char first_char;
     for(int i = 0; i <= n-8; i++)
     {
         for(int j = 0; j <= m-8; j++)
         {
             temp = 0;
-            first_char = 'B';
             for(int y = i; y < i+8; y++)
             {
                 for(int x = j; x < j+8; x++)
                 {
-
                     if((i%2 != y%2 && j%2 != x%2) || (i%2 == y%2 && j%2 == x%2))
                     {
-                        if(board[y][x] != first_char)
+                        if(board[i][j] != board[y][x])
                         {
                             temp++;
                         }
                     }
 
                     else{
-                        if(board[y][x] == first_char)
+                        if(board[i][j] == board[y][x])
                         {
                             temp++;
                         }
                     }
                 }
             }
+
             if(temp <= min)
             {
                 min = temp;
             }
+        }
+    }
 
+    for(int i = n-1; i >= 7; i--)
+    {
+        for(int j = m-1; j >= 7; j--)
+        {
             temp = 0;
-            first_char = 'W';
-            for(int y = i; y < i+8; y++)
+            for(int y = i; y > i-8; y--)
             {
-                for(int x = j; x < j+8; x++)
+                for(int x = j; x > j-8; x--)
                 {
-
                     if((i%2 != y%2 && j%2 != x%2) || (i%2 == y%2 && j%2 == x%2))
                     {
-                        if(board[y][x] != first_char)
+                        if(board[i][j] != board[y][x])
                         {
                             temp++;
                         }
                     }
 
                     else{
-                        if(board[y][x] == first_char)
+                        if(board[i][j] == board[y][x])
                         {
                             temp++;
                         }
                     }
                 }
             }
+
             if(temp <= min)
             {
                 min = temp;
