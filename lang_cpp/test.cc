@@ -4,6 +4,10 @@
 using namespace std;
 
 int main(){
-    int arr[3][4];
+    char a, b;
+    a = 'a';
+    b = 'b';
+
+    cout << (a<b) << endl;
     return 0;
 }

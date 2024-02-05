@@ -11,12 +11,12 @@ typedef struct coordinate
 
 bool compare(coordinate a, coordinate b)
 {
-    if(a.x == b.x)
+    if(a.y == b.y)
     {
-        return (a.y < b.y);
+        return (a.x < b.x);
     }
     else
-        return (a.x < b.x);
+        return (a.y < b.y);
 }
 
 void my_merge(coordinate *arr, int p, int q, int r)
