@@ -12,35 +12,33 @@ int main(){
     cout.tie(NULL);
     
     int n, m;
-    int temp;
-    set<int> cards;
-    vector<int> nums;
+    string temp;
+    int count = 0;
+    set<string> ss;
+    vector<string> sv;
 
-    cin >> n;
+    cin >> n >> m;
     for(int i = 0; i < n; i++)
     {
         cin >> temp;
-        cards.insert(temp);
+        ss.insert(temp);
     }
 
-    cin >> m;
     for(int i = 0; i < m; i++)
     {
         cin >> temp;
-        nums.push_back(temp);
+        sv.push_back(temp);
     }
 
-    for(auto elem : nums)
+    for(auto elem: sv)
     {
-        if(cards.find(elem) != cards.end())
+        if(ss.find(elem) != ss.end())
         {
-            cout << 1;
+            count++;
         }
-        else
-            cout << 0;
-        cout << " ";
     }
-    cout << "\n";
+
+    cout << count << "\n";
 
     return 0;
 }

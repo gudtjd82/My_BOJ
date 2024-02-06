@@ -4,10 +4,13 @@
 using namespace std;
 
 int main(){
-    char a, b;
-    a = 'a';
-    b = 'b';
+    string str;
+    int a;
 
-    cout << (a<b) << endl;
+    cin >> str;
+
+    a = stoi(str);
+
+    cout << stoi(str) << endl;
     return 0;
 }
